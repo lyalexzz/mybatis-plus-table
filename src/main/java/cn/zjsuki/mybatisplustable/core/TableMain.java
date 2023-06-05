@@ -1,5 +1,6 @@
 package cn.zjsuki.mybatisplustable.core;
 
+import cn.zjsuki.mybatisplustable.aop.IndexAop;
 import cn.zjsuki.mybatisplustable.config.MyBatisPlusTableConfig;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -8,6 +9,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jsqlparser.statement.create.table.Index;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -227,11 +229,24 @@ public class TableMain {
                 }
             }
         }
-        log.info("TableMaintenanceService.createTable sql:{}", stringBuffer.toString());
+        log.info("TableMaintenanceService.createTable sql:{}", stringBuffer);
         //开始执行sql语句
         jdbcTemplate.execute(stringBuffer.toString());
         if (StringUtils.isNotEmpty(autoIncrementSql)) {
             jdbcTemplate.execute(autoIncrementSql);
+        }
+        //判断实体类有没有@IndexAop注解，如果有就通过注解的value值来创建索引
+        if (clazz.getAnnotation(IndexAop.class) != null) {
+            String[] indexs = clazz.getAnnotation(IndexAop.class).value();
+            for (String index : indexs) {
+                String[] indexField = index.split(",");
+                String indexName = indexField[0];
+                String indexFieldStr = indexField[1];
+                String indexType = indexField[2];
+                String indexSql = "CREATE INDEX " + indexName + " ON " + tableName + "(" + indexFieldStr + ") USING " + indexType + ";";
+                log.info("TableMaintenanceService.createTable indexSql:{}", indexSql);
+                jdbcTemplate.execute(indexSql);
+            }
         }
     }
 
