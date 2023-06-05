@@ -14,7 +14,6 @@ import java.lang.annotation.*;
 public @interface IndexAop {
     /**
      * 索引合集
-     * @return
      */
     String[] value() default {};
 }

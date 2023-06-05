@@ -103,32 +103,31 @@ public class TableMain {
     public void createColumn(String tableName, List<Field> fieldList) {
         StringBuffer stringBuffer = new StringBuffer();
         fieldList.forEach(val -> {
-            //通过val.gatewayTableField().value()获取到字段名 并且组装添加字段的sql语句 通过字段类型来生成不同的sql语句
             TableField tableField = val.getAnnotation(TableField.class);
             String fieldName = tableField.value();
             String fieldType = val.getType().getSimpleName();
             String fieldDoc = val.getAnnotation(TableField.class).value();
-            if (fieldType.equalsIgnoreCase("String")) {
+            if ("String".equalsIgnoreCase(fieldType)) {
                 stringBuffer.append("alter table ").append(tableName).append(" add column ").append(fieldName).append(" varchar(255) comment '").append(fieldDoc).append("';");
-            } else if (fieldType.equalsIgnoreCase("Integer")) {
+            } else if ("Integer".equalsIgnoreCase(fieldType)) {
                 stringBuffer.append("alter table ").append(tableName).append(" add column ").append(fieldName).append(" int(11) comment '").append(fieldDoc).append("';");
-            } else if (fieldType.equalsIgnoreCase("Long")) {
+            } else if ("Long".equalsIgnoreCase(fieldType)) {
                 stringBuffer.append("alter table ").append(tableName).append(" add column ").append(fieldName).append(" bigint(20) comment '").append(fieldDoc).append("';");
-            } else if (fieldType.equalsIgnoreCase("Double")) {
+            } else if ("Double".equalsIgnoreCase(fieldType)) {
                 stringBuffer.append("alter table ").append(tableName).append(" add column ").append(fieldName).append(" double comment '").append(fieldDoc).append("';");
-            } else if (fieldType.equalsIgnoreCase("Float")) {
+            } else if ("Float".equalsIgnoreCase(fieldType)) {
                 stringBuffer.append("alter table ").append(tableName).append(" add column ").append(fieldName).append(" float comment '").append(fieldDoc).append("';");
-            } else if (fieldType.equalsIgnoreCase("Date")) {
+            } else if ("Date".equalsIgnoreCase(fieldType)) {
                 stringBuffer.append("alter table ").append(tableName).append(" add column ").append(fieldName).append(" datetime comment '").append(fieldDoc).append("';");
-            } else if (fieldType.equalsIgnoreCase("Boolean")) {
+            } else if ("Boolean".equalsIgnoreCase(fieldType)) {
                 stringBuffer.append("alter table ").append(tableName).append(" add column ").append(fieldName).append(" tinyint(1) comment '").append(fieldDoc).append("';");
-            } else if (fieldType.equalsIgnoreCase("BigDecimal")) {
+            } else if ("BigDecimal".equalsIgnoreCase(fieldType)) {
                 stringBuffer.append("alter table ").append(tableName).append(" add column ").append(fieldName).append(" decimal(19,2) comment '").append(fieldDoc).append("';");
-            } else if (fieldType.equalsIgnoreCase("Byte")) {
+            } else if ("Byte".equalsIgnoreCase(fieldType)) {
                 stringBuffer.append("alter table ").append(tableName).append(" add column ").append(fieldName).append(" tinyint(4) comment '").append(fieldDoc).append("';");
-            } else if (fieldType.equalsIgnoreCase("Short")) {
+            } else if ("Short".equalsIgnoreCase(fieldType)) {
                 stringBuffer.append("alter table ").append(tableName).append(" add column ").append(fieldName).append(" smallint(6) comment '").append(fieldDoc).append("';");
-            } else if (fieldType.equalsIgnoreCase("Character")) {
+            } else if ("Character".equalsIgnoreCase(fieldType)) {
                 stringBuffer.append("alter table ").append(tableName).append(" add column ").append(fieldName).append(" char(1) comment '").append(fieldDoc).append("';");
             }
         });
@@ -168,7 +167,7 @@ public class TableMain {
         StringBuilder stringBuffer = new StringBuilder();
         stringBuffer.append("create table ").append(tableName).append("(");
         for (Field field : fields) {
-            if (field.getName().equals("serialVersionUID")) {
+            if ("serialVersionUID".equals(field.getName())) {
                 continue;
             }
             //获取字段名
@@ -183,27 +182,27 @@ public class TableMain {
                 //获取字段的doc注释
                 fieldDoc = "";
             }
-            if (fieldType.equalsIgnoreCase("String")) {
+            if ("String".equalsIgnoreCase(fieldType)) {
                 stringBuffer.append(fieldName).append(" varchar(255) comment '").append(fieldDoc).append("',");
-            } else if (fieldType.equalsIgnoreCase("Integer")) {
+            } else if ("Integer".equalsIgnoreCase(fieldType)) {
                 stringBuffer.append(fieldName).append(" int(11) comment '").append(fieldDoc).append("',");
-            } else if (fieldType.equalsIgnoreCase("Long")) {
+            } else if ("Long".equalsIgnoreCase(fieldType)) {
                 stringBuffer.append(fieldName).append(" bigint(20) comment '").append(fieldDoc).append("',");
-            } else if (fieldType.equalsIgnoreCase("Double")) {
+            } else if ("Double".equalsIgnoreCase(fieldType)) {
                 stringBuffer.append(fieldName).append(" double comment '").append(fieldDoc).append("',");
-            } else if (fieldType.equalsIgnoreCase("Float")) {
+            } else if ("Float".equalsIgnoreCase(fieldType)) {
                 stringBuffer.append(fieldName).append(" float comment '").append(fieldDoc).append("',");
-            } else if (fieldType.equalsIgnoreCase("Date")) {
+            } else if ("Date".equalsIgnoreCase(fieldType)) {
                 stringBuffer.append(fieldName).append(" datetime comment '").append(fieldDoc).append("',");
-            } else if (fieldType.equalsIgnoreCase("Boolean")) {
+            } else if ("Boolean".equalsIgnoreCase(fieldType)) {
                 stringBuffer.append(fieldName).append(" tinyint(1) comment '").append(fieldDoc).append("',");
-            } else if (fieldType.equalsIgnoreCase("BigDecimal")) {
+            } else if ("BigDecimal".equalsIgnoreCase(fieldType)) {
                 stringBuffer.append(fieldName).append(" decimal(19,2) comment '").append(fieldDoc).append("',");
-            } else if (fieldType.equalsIgnoreCase("Byte")) {
+            } else if ("Byte".equalsIgnoreCase(fieldType)) {
                 stringBuffer.append(fieldName).append(" tinyint(4) comment '").append(fieldDoc).append("',");
-            } else if (fieldType.equalsIgnoreCase("Short")) {
+            } else if ("Short".equalsIgnoreCase(fieldType)) {
                 stringBuffer.append(fieldName).append(" smallint(6) comment '").append(fieldDoc).append("',");
-            } else if (fieldType.equalsIgnoreCase("Character")) {
+            } else if ("Character".equalsIgnoreCase(fieldType)) {
                 stringBuffer.append(fieldName).append(" char(1) comment '").append(fieldDoc).append("',");
             }
         }
@@ -213,11 +212,11 @@ public class TableMain {
             if (field.getAnnotation(TableId.class) != null) {
                 String fieldName = field.getName();
                 String fieldType = field.getType().getSimpleName();
-                if (fieldType.equalsIgnoreCase("String")) {
+                if ("String".equalsIgnoreCase(fieldType)) {
                     stringBuffer.append("primary key (").append(fieldName).append("))");
-                } else if (fieldType.equalsIgnoreCase("Integer")) {
+                } else if ("Integer".equalsIgnoreCase(fieldType)) {
                     stringBuffer.append("primary key (").append(fieldName).append("))");
-                } else if (fieldType.equalsIgnoreCase("Long")) {
+                } else if ("Long".equalsIgnoreCase(fieldType)) {
                     stringBuffer.append("primary key (").append(fieldName).append("))");
                 }
                 if (field.getAnnotation(TableId.class).type() == IdType.AUTO) {
