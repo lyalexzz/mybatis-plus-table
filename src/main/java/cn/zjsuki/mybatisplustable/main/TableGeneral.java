@@ -1,8 +1,8 @@
 package cn.zjsuki.mybatisplustable.main;
 
 import cn.zjsuki.mybatisplustable.config.MyBatisPlusTableConfig;
-import cn.zjsuki.mybatisplustable.core.Entity;
-import cn.zjsuki.mybatisplustable.core.TableMain;
+import cn.zjsuki.mybatisplustable.core.mysql.EntityCore;
+import cn.zjsuki.mybatisplustable.core.mysql.TableCore;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
@@ -17,6 +17,7 @@ import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.*;
 
 /**
  * @program: mybatis-plus-table
@@ -30,23 +31,37 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TableGeneral implements CommandLineRunner {
     private final MyBatisPlusTableConfig config;
-    private final TableMain tableMain;
+    private final TableCore tableCore;
+    private static final ThreadPoolExecutor EXECUTOR;
+
+    static {
+        // 核心线程数
+        int corePoolSize = 5;
+        // 最大线程数
+        int maximumPoolSize = 10;
+        // 线程空闲时间
+        long keepAliveTime = 60;
+        // 时间单位
+        TimeUnit unit = TimeUnit.SECONDS;
+        // 使用无界队列作为任务队列
+        EXECUTOR = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, unit, new LinkedBlockingQueue<>());
+    }
 
     @Override
-    public void run(String... args) throws Exception {
-        new Thread(() -> {
+    public void run(String... args) {
+        Runnable task = () -> {
             //判断是否启用插件
             if (!config.getEnable()) {
                 return;
             }
             //开始扫描表
-            List<Class<?>> entityList = Entity.scanPackageForEntities(config.getEntityScan());
+            List<Class<?>> entityList = EntityCore.scanPackageForEntities(config.getEntityScan());
             for (Class<?> clazz : entityList) {
                 //判断表是否存在
                 TableName tableName = clazz.getAnnotation(TableName.class);
                 if (tableExit(tableName.value())) {
                     //获取实体类的所有字段
-                    List<Field> fieldList = Entity.getAllFields(clazz);
+                    List<Field> fieldList = EntityCore.getAllFields(clazz);
                     List<Field> fieldName = new ArrayList<>();
                     fieldList.forEach(val -> {
                         TableField tableField = val.getAnnotation(TableField.class);
@@ -57,25 +72,28 @@ public class TableGeneral implements CommandLineRunner {
                     //判断实体类里面的字段是否都存在
                     List<Field> getNotExitColumn = null;
                     try {
-                        getNotExitColumn = tableMain.getNotExitColumn(tableName.value(), fieldName);
+                        getNotExitColumn = tableCore.getNotExitColumn(tableName.value(), fieldName);
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
                     }
                     if (getNotExitColumn.size() > 0) {
                         //开始创建字段
-                        tableMain.createColumn(tableName.value(), getNotExitColumn);
+                        tableCore.createColumn(tableName.value(), getNotExitColumn);
                     }
-                    List<Field> getNotExitTable = tableMain.getNotExitTableColumn(tableName.value(), fieldName);
+                    List<Field> getNotExitTable = tableCore.getNotExitTableColumn(tableName.value(), fieldName);
                     if (getNotExitTable.size() > 0) {
                         //开始创建字段
-                        tableMain.deleteColumn(tableName.value(), getNotExitTable);
+                        tableCore.deleteColumn(tableName.value(), getNotExitTable);
                     }
+                    //创建索引
+                    tableCore.createIndex(clazz);
                 } else {
                     log.info("表{}不存在，开始创建表", tableName.value());
-                    tableMain.createTable(clazz);
+                    tableCore.createTable(clazz);
                 }
             }
-        }).start();
+        };
+        EXECUTOR.execute(task);
     }
 
 

@@ -1,4 +1,4 @@
-package cn.zjsuki.mybatisplustable.core;
+package cn.zjsuki.mybatisplustable.core.mysql;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 
@@ -14,7 +14,7 @@ import java.util.List;
  * @author: LiYu
  * @create: 2023-06-01 11:46
  **/
-public class Entity {
+public class EntityCore {
     /**
      * 扫描包
      *

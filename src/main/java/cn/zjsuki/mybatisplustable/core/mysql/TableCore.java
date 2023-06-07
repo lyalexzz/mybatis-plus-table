@@ -1,7 +1,6 @@
-package cn.zjsuki.mybatisplustable.core;
+package cn.zjsuki.mybatisplustable.core.mysql;
 
 import cn.zjsuki.mybatisplustable.aop.IndexAop;
-import cn.zjsuki.mybatisplustable.config.MyBatisPlusTableConfig;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -9,11 +8,9 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.jsqlparser.statement.create.table.Index;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -21,6 +18,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -32,8 +30,9 @@ import java.util.Objects;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class TableMain {
+public class TableCore {
     private final JdbcTemplate jdbcTemplate;
+    private final IndexCore indexCore;
 
     /**
      * 获取不存在的列
@@ -242,11 +241,41 @@ public class TableMain {
                 String indexName = indexField[0];
                 String indexFieldStr = indexField[1];
                 String indexType = indexField[2];
-                String indexSql = "CREATE INDEX " + indexName + " ON " + tableName + "(" + indexFieldStr + ") USING " + indexType + ";";
-                log.info("TableMaintenanceService.createTable indexSql:{}", indexSql);
-                jdbcTemplate.execute(indexSql);
+                indexCore.createIndex(tableName,indexName,indexFieldStr,indexType);
             }
         }
     }
+
+    /**
+     * 判断Class的@IndexAop是否存在，如果存在判断索引是否存在，如果不存在就创建索引
+     * @param clazz 类
+     */
+    public void createIndex(Class<?> clazz) {
+        //获取表名
+        String tableName = clazz.getAnnotation(TableName.class).value();
+        //判断实体类有没有@IndexAop注解，如果有就通过注解的value值来创建索引
+        if (clazz.getAnnotation(IndexAop.class) != null) {
+            //表中的索引如果在注解中不存在就删除索引，如果存在就不做任何操作
+            List<Map<String, Object>> list = indexCore.getIndex(tableName);
+            String[] indexs = clazz.getAnnotation(IndexAop.class).value();
+            for (String index : indexs) {
+                String[] indexField = index.split(",");
+                String indexName = indexField[0];
+                String indexFieldStr = indexField[1];
+                String indexType = indexField[2];
+                boolean flag = false;
+                for (Map<String, Object> map : list) {
+                    if (indexName.equals(map.get("Key_name"))) {
+                        flag = true;
+                        break;
+                    }
+                }
+                if (!flag) {
+                    indexCore.createIndex(tableName,indexName,indexFieldStr,indexType);
+                }
+            }
+        }
+    }
+
 
 }
