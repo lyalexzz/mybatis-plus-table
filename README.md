@@ -9,3 +9,8 @@ mybatis-plus-table-config:
     hump: true #是否开启驼峰命名
     tenantIdList: [1,2,3]    #多租户id列表
     tenantType: TABLE #多租户类型 TABLE:表级别，COLUMN:列级别
+    databaseList:
+        租户1:
+            url: jdbc:mysql://${MYSQL_ADDR:192.168.2.115}:${MYSQL_PORT:3306}/risk_system?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+            username: ${MYSQL_USER:root}
+            password: ${MYSQL_PASSWORD:root}

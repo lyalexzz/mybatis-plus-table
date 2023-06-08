@@ -7,6 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @program: mybatis-plus-table
@@ -46,4 +47,8 @@ public class MyBatisPlusTableConfig {
      * 租户类型
      */
     public TenantType tenantType;
+    /**
+     * 租户数据源列表
+     */
+    public Map<String, Map<String, String>> tenantDatabaseList;
 }

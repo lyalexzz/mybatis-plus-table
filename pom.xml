@@ -14,26 +14,32 @@
     <name>mybatis-plus-table</name>
     <description>mybatis-plus-table</description>
     <properties>
-        <mybatis-plus-version>3.5.3.1</mybatis-plus-version>
-        <lombok-version>1.18.26</lombok-version>
-        <aspectj-version>1.9.7</aspectj-version>
+        <mybatis.plus.version>3.5.3.1</mybatis.plus.version>
+        <lombok.version>1.18.26</lombok.version>
+        <aspectj.version>1.9.7</aspectj.version>
         <java.version>8</java.version>
+        <commons.version>2.9.0</commons.version>
     </properties>
     <dependencies>
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
-            <version>${mybatis-plus-version}</version>
+            <version>${mybatis.plus.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>${lombok-version}</version>
+            <version>${lombok.version}</version>
         </dependency>
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>
-            <version>${aspectj-version}</version>
+            <version>${aspectj.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-dbcp2</artifactId>
+            <version>${commons.version}</version>
         </dependency>
     </dependencies>
 
