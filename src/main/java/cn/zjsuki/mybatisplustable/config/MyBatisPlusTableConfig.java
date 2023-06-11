@@ -6,6 +6,7 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -42,11 +43,11 @@ public class MyBatisPlusTableConfig {
     /**
      * 租户列表
      */
-    public List<String> tenantIdList;
+    public List<String> tenantIdList = new ArrayList<>();
     /**
      * 租户类型
      */
-    public TenantType tenantType;
+    public TenantType tenantType = TenantType.NONE;
     /**
      * 租户数据源列表
      */
