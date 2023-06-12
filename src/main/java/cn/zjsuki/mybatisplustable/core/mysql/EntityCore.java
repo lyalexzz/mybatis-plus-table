@@ -1,12 +1,18 @@
 package cn.zjsuki.mybatisplustable.core.mysql;
 
+import cn.zjsuki.mybatisplustable.config.MyBatisPlusTableConfig;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @program: mybatis-plus-table
@@ -14,7 +20,11 @@ import java.util.List;
  * @author: LiYu
  * @create: 2023-06-01 11:46
  **/
+@RequiredArgsConstructor
+@Component
 public class EntityCore {
+    private final MyBatisPlusTableConfig config;
+
     /**
      * 扫描包
      *
@@ -77,4 +87,60 @@ public class EntityCore {
         //判断是否有@TableName注解，有的话则放入生成列表
         return clazz.isAnnotationPresent(TableName.class);
     }
+
+    /**
+     * 获取字段名称
+     *
+     * @param field 字段
+     * @return 结果
+     */
+    public String getFieldName(Field field) {
+        String fieldName = field.getName();
+        if (field.isAnnotationPresent(TableField.class)) {
+            TableField tableField = field.getAnnotation(TableField.class);
+            if (!tableField.value().isEmpty()) {
+                fieldName = tableField.value();
+            }
+        }
+        return humpToUnderline(fieldName);
+    }
+
+    /**
+     * 获取实体类名称
+     *
+     * @param clazz 实体类
+     * @return 结果
+     */
+    public String getEntityName(Class<?> clazz) {
+        String entityName = clazz.getSimpleName();
+        if (clazz.isAnnotationPresent(TableName.class)) {
+            TableName tableName = clazz.getAnnotation(TableName.class);
+            if (!tableName.value().isEmpty()) {
+                entityName = tableName.value();
+            }
+        }
+        return humpToUnderline(entityName);
+    }
+
+    /**
+     * 驼峰转下划线
+     *
+     * @param str 驼峰字符串
+     * @return 结果
+     */
+    public String humpToUnderline(String str) {
+        if (!config.hump) {
+            return str;
+        }
+        Matcher matcher = Pattern.compile("[A-Z]").matcher(str);
+        StringBuilder builder = new StringBuilder(str);
+        for (int i = 0; matcher.find(); ++i) {
+            builder.replace(matcher.start() + i, matcher.end() + i, "_" + matcher.group().toLowerCase());
+        }
+        if (builder.charAt(0) == '_') {
+            builder.deleteCharAt(0);
+        }
+        return builder.toString();
+    }
+
 }

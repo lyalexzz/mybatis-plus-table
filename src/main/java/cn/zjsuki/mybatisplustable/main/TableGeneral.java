@@ -34,6 +34,7 @@ public class TableGeneral implements CommandLineRunner {
     private final MyBatisPlusTableConfig config;
     private final TableCore tableCore;
     private static final ThreadPoolExecutor EXECUTOR;
+    private final EntityCore entityCore;
 
     static {
         // 核心线程数
@@ -62,29 +63,30 @@ public class TableGeneral implements CommandLineRunner {
                 return;
             }
             List<String> tenantIdList = config.getTenantIdList();
-            if(tenantIdList.size() == 0) {
+            if (tenantIdList.size() == 0) {
                 tenantIdList.add("");
             }
-            tenantIdList.forEach(tenantId ->{
+            tenantIdList.forEach(tenantId -> {
                 String suffix = "";
-                if(config.getTenantType().equals(TenantType.TABLE)) {
+                if (config.getTenantType().equals(TenantType.TABLE)) {
                     suffix = "_" + tenantId;
                 }
                 for (Class<?> clazz : entityList) {
                     //判断表是否存在
-                    TableName tableName = clazz.getAnnotation(TableName.class);
-                    if (tableName == null) {
-                        log.error("实体类{}没有添加@TableName注解", clazz.getName());
-                        continue;
-                    }
-                    String name = tableName.value() + suffix;
+                    String name = entityCore.getEntityName(clazz) + suffix;
                     if (tableCore.isTableExist(name)) {
                         //获取实体类的所有字段
                         List<Field> fieldList = EntityCore.getAllFields(clazz);
                         List<Field> fieldName = new ArrayList<>();
                         fieldList.forEach(val -> {
+                            if("serialVersionUID".equals(val.getName())) {
+                                return;
+                            }
                             TableField tableField = val.getAnnotation(TableField.class);
                             if (tableField != null && tableField.exist()) {
+                                fieldName.add(val);
+                            }
+                            if(tableField == null) {
                                 fieldName.add(val);
                             }
                         });
@@ -99,9 +101,14 @@ public class TableGeneral implements CommandLineRunner {
                             //开始创建字段
                             tableCore.createColumn(name, getNotExitColumn);
                         }
-                        List<Field> getNotExitTable = tableCore.getNotExitTableColumn(name, fieldName);
+                        List<String> getNotExitTable = null;
+                        try {
+                            getNotExitTable = tableCore.getNotExitField(name, fieldName);
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
                         if (getNotExitTable.size() > 0) {
-                            //开始创建字段
+                            //开始删除字段
                             tableCore.deleteColumn(name, getNotExitTable);
                         }
                         //创建索引

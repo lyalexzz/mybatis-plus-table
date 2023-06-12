@@ -1,6 +1,7 @@
 package cn.zjsuki.mybatisplustable.core.mysql;
 
 import cn.zjsuki.mybatisplustable.aop.IndexAop;
+import cn.zjsuki.mybatisplustable.config.MyBatisPlusTableConfig;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -20,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @program: mybatis-plus-table
@@ -33,6 +36,7 @@ import java.util.Objects;
 public class TableCore {
     private final JdbcTemplate jdbcTemplate;
     private final IndexCore indexCore;
+    private final EntityCore entityCore;
 
     /**
      * 获取不存在的列
@@ -47,14 +51,20 @@ public class TableCore {
         try (Connection connection = Objects.requireNonNull(jdbcTemplate.getDataSource()).getConnection()) {
             DatabaseMetaData metaData = connection.getMetaData();
             ResultSet resultSet = metaData.getColumns(null, null, tableName, null);
+            //获取所有的列名
+            List<String> columnList = new ArrayList<>();
+            while (resultSet.next()) {
+                columnList.add(resultSet.getString("COLUMN_NAME"));
+            }
+
             for (Field desiredColumnName : columnNames) {
                 boolean exit = false;
-                while (resultSet.next()) {
-                    String columnName = resultSet.getString("COLUMN_NAME");
-                    if (desiredColumnName.getName().equalsIgnoreCase(columnName)) {
+                for (String columnName : columnList) {
+                    if (entityCore.getFieldName(desiredColumnName).equalsIgnoreCase(columnName)) {
                         exit = true;
                     }
                 }
+                log.info("是否存在：{}", exit);
                 if (!exit) {
                     notExitColumn.add(desiredColumnName);
                 }
@@ -64,34 +74,33 @@ public class TableCore {
     }
 
     /**
-     * 获取表结构不存在的字段但是实体类中存在的字段
+     * 获取表结构存在的字段但是实体类中不存在的字段
      *
      * @param tableName 表名
      * @param fieldList 字段列表
      */
-    public List<Field> getNotExitTableColumn(String tableName, List<Field> fieldList) {
-        List<Field> notExitColumn = new ArrayList<>();
+    public List<String> getNotExitField(String tableName, List<Field> fieldList) throws SQLException {
+        List<String> notExitField = new ArrayList<>();
         try (Connection connection = Objects.requireNonNull(jdbcTemplate.getDataSource()).getConnection()) {
             DatabaseMetaData metaData = connection.getMetaData();
             ResultSet resultSet = metaData.getColumns(null, null, tableName, null);
-            for (Field desiredColumnName : fieldList) {
+            while (resultSet.next()) {
+                String columnName = resultSet.getString("COLUMN_NAME");
                 boolean exit = false;
-                while (resultSet.next()) {
-                    String columnName = resultSet.getString("COLUMN_NAME");
-                    if (desiredColumnName.getAnnotation(TableField.class).value().equalsIgnoreCase(columnName)) {
+                for (Field field : fieldList) {
+                    String fieldName = entityCore.getFieldName(field);
+                    if (fieldName.equalsIgnoreCase(columnName)) {
                         exit = true;
                     }
                 }
                 if (!exit) {
-                    notExitColumn.add(desiredColumnName);
+                    notExitField.add(columnName);
                 }
             }
-            return notExitColumn;
-        } catch (SQLException e) {
-            e.printStackTrace();
+            return notExitField;
         }
-        return null;
     }
+
 
     /**
      * 通过List<Field>获取到每个Field的TableField value字段，然后通过Field获取字段doc注释，最后通过传入的tableName和List<Field>创建字段
@@ -102,10 +111,9 @@ public class TableCore {
     public void createColumn(String tableName, List<Field> fieldList) {
         StringBuffer stringBuffer = new StringBuffer();
         fieldList.forEach(val -> {
-            TableField tableField = val.getAnnotation(TableField.class);
-            String fieldName = tableField.value();
+            String fieldName = entityCore.getFieldName(val);
             String fieldType = val.getType().getSimpleName();
-            String fieldDoc = val.getAnnotation(TableField.class).value();
+            String fieldDoc = val.getAnnotation(TableField.class) != null ? val.getAnnotation(TableField.class).value() : "";
             if ("String".equalsIgnoreCase(fieldType)) {
                 stringBuffer.append("alter table ").append(tableName).append(" add column ").append(fieldName).append(" varchar(255) comment '").append(fieldDoc).append("';");
             } else if ("Integer".equalsIgnoreCase(fieldType)) {
@@ -140,16 +148,15 @@ public class TableCore {
      * @param tableName 表名称
      * @param fieldList 字段列表
      */
-    public void deleteColumn(String tableName, List<Field> fieldList) {
-        StringBuffer stringBuffer = new StringBuffer();
+    public void deleteColumn(String tableName, List<String> fieldList) {
+        final StringBuffer[] stringBuffer = {new StringBuffer()};
         fieldList.forEach(val -> {
-            //通过val.gatewayTableField().value()获取到字段名 并且组装添加字段的sql语句 通过字段类型来生成不同的sql语句
-            TableField tableField = val.getAnnotation(TableField.class);
-            String fieldName = tableField.value();
-            stringBuffer.append("alter table ").append(tableName).append(" drop column ").append(fieldName).append(";");
+            String fieldName = entityCore.humpToUnderline(val);
+            stringBuffer[0].append("alter table ").append(tableName).append(" drop column ").append(fieldName).append(";");
+            jdbcTemplate.execute(stringBuffer[0].toString());
+            stringBuffer[0] = new StringBuffer();
         });
-        //开始执行sql语句
-        jdbcTemplate.execute(stringBuffer.toString());
+
     }
 
     /**
@@ -170,7 +177,7 @@ public class TableCore {
                 continue;
             }
             //获取字段名
-            String fieldName = field.getName();
+            String fieldName = entityCore.getFieldName(field);
             //获取字段类型
             String fieldType = field.getType().getSimpleName();
             //获取字段注释
@@ -209,7 +216,7 @@ public class TableCore {
         //获取携带TableId的字段，并且为他添加主键以及根据主键生成策略
         for (Field field : fields) {
             if (field.getAnnotation(TableId.class) != null) {
-                String fieldName = field.getName();
+                String fieldName = entityCore.getFieldName(field);
                 String fieldType = field.getType().getSimpleName();
                 if ("String".equalsIgnoreCase(fieldType)) {
                     stringBuffer.append("primary key (").append(fieldName).append("))");
@@ -241,13 +248,14 @@ public class TableCore {
                 String indexName = indexField[0];
                 String indexFieldStr = indexField[1];
                 String indexType = indexField[2];
-                indexCore.createIndex(tableName,indexName,indexFieldStr,indexType);
+                indexCore.createIndex(tableName, indexName, indexFieldStr, indexType);
             }
         }
     }
 
     /**
      * 判断Class的@IndexAop是否存在，如果存在判断索引是否存在，如果不存在就创建索引
+     *
      * @param clazz 类
      */
     public void createIndex(Class<?> clazz) {
@@ -271,7 +279,7 @@ public class TableCore {
                     }
                 }
                 if (!flag) {
-                    indexCore.createIndex(tableName,indexName,indexFieldStr,indexType);
+                    indexCore.createIndex(tableName, indexName, indexFieldStr, indexType);
                 }
             }
         }
@@ -279,6 +287,7 @@ public class TableCore {
 
     /**
      * 判断表是否存在
+     *
      * @param tableName 表名
      * @return true 存在 false 不存在
      */
