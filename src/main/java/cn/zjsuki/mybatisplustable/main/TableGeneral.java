@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +31,7 @@ import java.util.concurrent.*;
 @Component
 @Configuration
 @RequiredArgsConstructor
+@ComponentScan
 public class TableGeneral implements CommandLineRunner {
     private final MyBatisPlusTableConfig config;
     private final TableCore tableCore;

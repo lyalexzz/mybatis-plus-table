@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +34,7 @@ import java.util.regex.Pattern;
 @Slf4j
 @RequiredArgsConstructor
 @Component
+@ComponentScan
 public class TableCore {
     private final JdbcTemplate jdbcTemplate;
     private final IndexCore indexCore;

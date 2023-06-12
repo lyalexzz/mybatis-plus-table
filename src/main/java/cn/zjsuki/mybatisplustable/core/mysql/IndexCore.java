@@ -2,6 +2,7 @@ package cn.zjsuki.mybatisplustable.core.mysql;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,7 @@ import java.util.Map;
 @Slf4j
 @RequiredArgsConstructor
 @Component
+@ComponentScan
 public class IndexCore {
     private final JdbcTemplate jdbcTemplate;
 

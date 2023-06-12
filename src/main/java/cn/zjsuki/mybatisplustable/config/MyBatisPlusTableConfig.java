@@ -4,6 +4,7 @@ import cn.zjsuki.mybatisplustable.enums.DatabaseType;
 import cn.zjsuki.mybatisplustable.enums.TenantType;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import java.util.Map;
 @Configuration
 @Data
 @ConfigurationProperties(prefix = "mybatis-plus-table-config")
+@ComponentScan
 public class MyBatisPlusTableConfig {
     /**
      * 是否启用

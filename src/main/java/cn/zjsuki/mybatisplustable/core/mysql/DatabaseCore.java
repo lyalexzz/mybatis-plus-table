@@ -5,6 +5,7 @@ import cn.zjsuki.mybatisplustable.enums.TenantType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
@@ -24,6 +25,7 @@ import java.util.Map;
 @Slf4j
 @RequiredArgsConstructor
 @Component
+@ComponentScan
 public class DatabaseCore {
     private final MyBatisPlusTableConfig config;
     private final Map<String, DataSource> dataSources = new HashMap<>();
