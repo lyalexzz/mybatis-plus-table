@@ -78,7 +78,7 @@ public class TableGeneral implements CommandLineRunner {
                         continue;
                     }
                     String name = tableName.value() + suffix;
-                    if (tableExit(name)) {
+                    if (tableCore.isTableExist(name)) {
                         //获取实体类的所有字段
                         List<Field> fieldList = EntityCore.getAllFields(clazz);
                         List<Field> fieldName = new ArrayList<>();
@@ -117,15 +117,4 @@ public class TableGeneral implements CommandLineRunner {
         EXECUTOR.execute(task);
     }
 
-
-    /**
-     * 判断表是否存在
-     *
-     * @param tableName 表名
-     * @return 结果
-     */
-    public boolean tableExit(String tableName) {
-        TableInfo tableInfo = TableInfoHelper.getTableInfo(tableName);
-        return tableInfo != null;
-    }
 }

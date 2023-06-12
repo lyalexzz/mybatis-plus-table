@@ -221,7 +221,7 @@ public class TableCore {
                 if (field.getAnnotation(TableId.class).type() == IdType.AUTO) {
                     stringBuffer.append(" ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;");
                     //并且为他添加自增
-                    autoIncrementSql = "ALTER TABLE" + tableName + " modify " + fieldName + " int(11) AUTO_INCREMENT;";
+                    autoIncrementSql = "ALTER TABLE " + tableName + " modify " + fieldName + " int(11) AUTO_INCREMENT;";
                 } else {
                     stringBuffer.append(" ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
                 }
@@ -275,6 +275,17 @@ public class TableCore {
                 }
             }
         }
+    }
+
+    /**
+     * 判断表是否存在
+     * @param tableName 表名
+     * @return true 存在 false 不存在
+     */
+    public boolean isTableExist(String tableName) {
+        String sql = "select count(*) from information_schema.TABLES where table_name = '" + tableName + "'";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class);
+        return count != null && count > 0;
     }
 
 
