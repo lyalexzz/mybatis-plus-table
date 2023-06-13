@@ -1,6 +1,8 @@
 package cn.zjsuki.mybatisplustable.core.mysql;
 
 import cn.zjsuki.mybatisplustable.config.MyBatisPlusTableConfig;
+import cn.zjsuki.mybatisplustable.enums.TenantFollowType;
+import cn.zjsuki.mybatisplustable.enums.TenantType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.RequiredArgsConstructor;
@@ -110,15 +112,23 @@ public class EntityCore {
     /**
      * 获取实体类名称
      *
-     * @param clazz 实体类
+     * @param clazz    实体类
+     * @param tenantId 租户id
      * @return 结果
      */
-    public String getEntityName(Class<?> clazz) {
+    public String getEntityName(Class<?> clazz, String tenantId) {
         String entityName = clazz.getSimpleName();
         if (clazz.isAnnotationPresent(TableName.class)) {
             TableName tableName = clazz.getAnnotation(TableName.class);
             if (!tableName.value().isEmpty()) {
                 entityName = tableName.value();
+            }
+        }
+        if (config.getTenantType().equals(TenantType.TABLE)) {
+            if (config.getTenantFollowType().equals(TenantFollowType.SUFFIX)) {
+                entityName = entityName + "_" + tenantId;
+            } else {
+                entityName = tenantId + "_" + entityName;
             }
         }
         return humpToUnderline(entityName);

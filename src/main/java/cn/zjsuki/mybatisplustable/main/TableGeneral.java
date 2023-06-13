@@ -3,6 +3,8 @@ package cn.zjsuki.mybatisplustable.main;
 import cn.zjsuki.mybatisplustable.config.MyBatisPlusTableConfig;
 import cn.zjsuki.mybatisplustable.core.mysql.EntityCore;
 import cn.zjsuki.mybatisplustable.core.mysql.TableCore;
+import cn.zjsuki.mybatisplustable.enums.OperationModeType;
+import cn.zjsuki.mybatisplustable.enums.TenantFollowType;
 import cn.zjsuki.mybatisplustable.enums.TenantType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -58,6 +60,9 @@ public class TableGeneral implements CommandLineRunner {
             if (!config.getEnable()) {
                 return;
             }
+            if (config.getOperationMode().equals(OperationModeType.AT_RUNTIME)) {
+                return;
+            }
             //开始扫描表
             List<Class<?>> entityList = EntityCore.scanPackageForEntities(config.getEntityScan());
             if (entityList.size() == 0) {
@@ -69,31 +74,27 @@ public class TableGeneral implements CommandLineRunner {
                 tenantIdList.add("");
             }
             tenantIdList.forEach(tenantId -> {
-                String suffix = "";
-                if (config.getTenantType().equals(TenantType.TABLE)) {
-                    suffix = "_" + tenantId;
-                }
                 for (Class<?> clazz : entityList) {
                     //判断表是否存在
-                    String name = entityCore.getEntityName(clazz) + suffix;
+                    String name = entityCore.getEntityName(clazz,tenantId);
                     if (tableCore.isTableExist(name)) {
                         //获取实体类的所有字段
                         List<Field> fieldList = EntityCore.getAllFields(clazz);
                         List<Field> fieldName = new ArrayList<>();
                         fieldList.forEach(val -> {
-                            if("serialVersionUID".equals(val.getName())) {
+                            if ("serialVersionUID".equals(val.getName())) {
                                 return;
                             }
                             TableField tableField = val.getAnnotation(TableField.class);
                             if (tableField != null && tableField.exist()) {
                                 fieldName.add(val);
                             }
-                            if(tableField == null) {
+                            if (tableField == null) {
                                 fieldName.add(val);
                             }
                         });
                         //判断实体类里面的字段是否都存在
-                        List<Field> getNotExitColumn = null;
+                        List<Field> getNotExitColumn;
                         try {
                             getNotExitColumn = tableCore.getNotExitColumn(name, fieldName);
                         } catch (SQLException e) {
@@ -117,7 +118,7 @@ public class TableGeneral implements CommandLineRunner {
                         tableCore.createIndex(clazz);
                     } else {
                         log.info("表{}不存在，开始创建表", name);
-                        tableCore.createTable(clazz);
+                        tableCore.createTable(clazz,name);
                     }
                 }
             });

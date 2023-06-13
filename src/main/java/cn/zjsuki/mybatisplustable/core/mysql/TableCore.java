@@ -1,7 +1,7 @@
 package cn.zjsuki.mybatisplustable.core.mysql;
 
 import cn.zjsuki.mybatisplustable.aop.IndexAop;
-import cn.zjsuki.mybatisplustable.config.MyBatisPlusTableConfig;
+import cn.zjsuki.mybatisplustable.enums.DataType;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -22,8 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @program: mybatis-plus-table
@@ -46,7 +44,6 @@ public class TableCore {
      * @param tableName   表名
      * @param columnNames 列名
      * @return 结果
-     * @throws SQLException
      */
     public List<Field> getNotExitColumn(String tableName, List<Field> columnNames) throws SQLException {
         List<Field> notExitColumn = new ArrayList<>();
@@ -116,28 +113,28 @@ public class TableCore {
             String fieldName = entityCore.getFieldName(val);
             String fieldType = val.getType().getSimpleName();
             String fieldDoc = val.getAnnotation(TableField.class) != null ? val.getAnnotation(TableField.class).value() : "";
-            if ("String".equalsIgnoreCase(fieldType)) {
-                stringBuffer.append("alter table ").append(tableName).append(" add column ").append(fieldName).append(" varchar(255) comment '").append(fieldDoc).append("';");
-            } else if ("Integer".equalsIgnoreCase(fieldType)) {
-                stringBuffer.append("alter table ").append(tableName).append(" add column ").append(fieldName).append(" int(11) comment '").append(fieldDoc).append("';");
-            } else if ("Long".equalsIgnoreCase(fieldType)) {
-                stringBuffer.append("alter table ").append(tableName).append(" add column ").append(fieldName).append(" bigint(20) comment '").append(fieldDoc).append("';");
-            } else if ("Double".equalsIgnoreCase(fieldType)) {
-                stringBuffer.append("alter table ").append(tableName).append(" add column ").append(fieldName).append(" double comment '").append(fieldDoc).append("';");
-            } else if ("Float".equalsIgnoreCase(fieldType)) {
-                stringBuffer.append("alter table ").append(tableName).append(" add column ").append(fieldName).append(" float comment '").append(fieldDoc).append("';");
-            } else if ("Date".equalsIgnoreCase(fieldType)) {
-                stringBuffer.append("alter table ").append(tableName).append(" add column ").append(fieldName).append(" datetime comment '").append(fieldDoc).append("';");
-            } else if ("Boolean".equalsIgnoreCase(fieldType)) {
-                stringBuffer.append("alter table ").append(tableName).append(" add column ").append(fieldName).append(" tinyint(1) comment '").append(fieldDoc).append("';");
-            } else if ("BigDecimal".equalsIgnoreCase(fieldType)) {
-                stringBuffer.append("alter table ").append(tableName).append(" add column ").append(fieldName).append(" decimal(19,2) comment '").append(fieldDoc).append("';");
-            } else if ("Byte".equalsIgnoreCase(fieldType)) {
-                stringBuffer.append("alter table ").append(tableName).append(" add column ").append(fieldName).append(" tinyint(4) comment '").append(fieldDoc).append("';");
-            } else if ("Short".equalsIgnoreCase(fieldType)) {
-                stringBuffer.append("alter table ").append(tableName).append(" add column ").append(fieldName).append(" smallint(6) comment '").append(fieldDoc).append("';");
-            } else if ("Character".equalsIgnoreCase(fieldType)) {
-                stringBuffer.append("alter table ").append(tableName).append(" add column ").append(fieldName).append(" char(1) comment '").append(fieldDoc).append("';");
+            if (DataType.STRING.getDesc().equalsIgnoreCase(fieldType)) {
+                stringBuffer.append("ALTER TABLE ").append(tableName).append(" ADD COLUMN ").append(fieldName).append(" varchar(255) COMMENT '").append(fieldDoc).append("';");
+            } else if (DataType.INTEGER.getDesc().equalsIgnoreCase(fieldType)) {
+                stringBuffer.append("ALTER TABLE ").append(tableName).append(" ADD COLUMN ").append(fieldName).append(" int(11) COMMENT '").append(fieldDoc).append("';");
+            } else if (DataType.LONG.getDesc().equalsIgnoreCase(fieldType)) {
+                stringBuffer.append("ALTER TABLE ").append(tableName).append(" ADD COLUMN ").append(fieldName).append(" bigint(20) COMMENT '").append(fieldDoc).append("';");
+            } else if (DataType.DOUBLE.getDesc().equalsIgnoreCase(fieldType)) {
+                stringBuffer.append("ALTER TABLE ").append(tableName).append(" ADD COLUMN ").append(fieldName).append(" double COMMENT '").append(fieldDoc).append("';");
+            } else if (DataType.FLOAT.getDesc().equalsIgnoreCase(fieldType)) {
+                stringBuffer.append("ALTER TABLE ").append(tableName).append(" ADD COLUMN ").append(fieldName).append(" float COMMENT '").append(fieldDoc).append("';");
+            } else if (DataType.DATE.getDesc().equalsIgnoreCase(fieldType) || DataType.LocalDateTime.getDesc().equalsIgnoreCase(fieldType)) {
+                stringBuffer.append("ALTER TABLE ").append(tableName).append(" ADD COLUMN ").append(fieldName).append(" datetime COMMENT '").append(fieldDoc).append("';");
+            } else if (DataType.BOOLEAN.getDesc().equalsIgnoreCase(fieldType)) {
+                stringBuffer.append("ALTER TABLE ").append(tableName).append(" ADD COLUMN ").append(fieldName).append(" tinyint(1) COMMENT '").append(fieldDoc).append("';");
+            } else if (DataType.BIGDECIMAL.getDesc().equalsIgnoreCase(fieldType)) {
+                stringBuffer.append("ALTER TABLE ").append(tableName).append(" ADD COLUMN ").append(fieldName).append(" decimal(19,2) COMMENT '").append(fieldDoc).append("';");
+            } else if (DataType.BYTE.getDesc().equalsIgnoreCase(fieldType)) {
+                stringBuffer.append("ALTER TABLE ").append(tableName).append(" ADD COLUMN ").append(fieldName).append(" tinyint(4) COMMENT '").append(fieldDoc).append("';");
+            } else if (DataType.SHORT.getDesc().equalsIgnoreCase(fieldType)) {
+                stringBuffer.append("ALTER TABLE ").append(tableName).append(" ADD COLUMN ").append(fieldName).append(" smallint(6) COMMENT '").append(fieldDoc).append("';");
+            } else if (DataType.CHARACTER.getDesc().equalsIgnoreCase(fieldType)) {
+                stringBuffer.append("ALTER TABLE ").append(tableName).append(" ADD COLUMN ").append(fieldName).append(" char(1) COMMENT '").append(fieldDoc).append("';");
             }
         });
         //开始执行sql语句
@@ -154,7 +151,7 @@ public class TableCore {
         final StringBuffer[] stringBuffer = {new StringBuffer()};
         fieldList.forEach(val -> {
             String fieldName = entityCore.humpToUnderline(val);
-            stringBuffer[0].append("alter table ").append(tableName).append(" drop column ").append(fieldName).append(";");
+            stringBuffer[0].append("ALTER TABLE ").append(tableName).append(" drop column ").append(fieldName).append(";");
             jdbcTemplate.execute(stringBuffer[0].toString());
             stringBuffer[0] = new StringBuffer();
         });
@@ -164,94 +161,112 @@ public class TableCore {
     /**
      * 通过Class以及他的mybatis-plus注解创建表
      *
-     * @param clazz 类
+     * @param clazz     类
+     * @param tableName 表名
+     * @return 是否创建成功
      */
-    public void createTable(Class<?> clazz) {
-        //获取表名
-        String tableName = clazz.getAnnotation(TableName.class).value();
-        //获取所有字段
-        Field[] fields = clazz.getDeclaredFields();
-        //拼接sql语句
-        StringBuilder stringBuffer = new StringBuilder();
-        stringBuffer.append("create table ").append(tableName).append("(");
-        for (Field field : fields) {
-            if ("serialVersionUID".equals(field.getName())) {
-                continue;
-            }
-            //获取字段名
-            String fieldName = entityCore.getFieldName(field);
-            //获取字段类型
-            String fieldType = field.getType().getSimpleName();
-            //获取字段注释
-            String fieldDoc;
-            if (field.getAnnotation(TableField.class) != null) {
-                fieldDoc = field.getAnnotation(TableField.class).value();
-            } else {
-                //获取字段的doc注释
-                fieldDoc = "";
-            }
-            if ("String".equalsIgnoreCase(fieldType)) {
-                stringBuffer.append(fieldName).append(" varchar(255) comment '").append(fieldDoc).append("',");
-            } else if ("Integer".equalsIgnoreCase(fieldType)) {
-                stringBuffer.append(fieldName).append(" int(11) comment '").append(fieldDoc).append("',");
-            } else if ("Long".equalsIgnoreCase(fieldType)) {
-                stringBuffer.append(fieldName).append(" bigint(20) comment '").append(fieldDoc).append("',");
-            } else if ("Double".equalsIgnoreCase(fieldType)) {
-                stringBuffer.append(fieldName).append(" double comment '").append(fieldDoc).append("',");
-            } else if ("Float".equalsIgnoreCase(fieldType)) {
-                stringBuffer.append(fieldName).append(" float comment '").append(fieldDoc).append("',");
-            } else if ("Date".equalsIgnoreCase(fieldType)) {
-                stringBuffer.append(fieldName).append(" datetime comment '").append(fieldDoc).append("',");
-            } else if ("Boolean".equalsIgnoreCase(fieldType)) {
-                stringBuffer.append(fieldName).append(" tinyint(1) comment '").append(fieldDoc).append("',");
-            } else if ("BigDecimal".equalsIgnoreCase(fieldType)) {
-                stringBuffer.append(fieldName).append(" decimal(19,2) comment '").append(fieldDoc).append("',");
-            } else if ("Byte".equalsIgnoreCase(fieldType)) {
-                stringBuffer.append(fieldName).append(" tinyint(4) comment '").append(fieldDoc).append("',");
-            } else if ("Short".equalsIgnoreCase(fieldType)) {
-                stringBuffer.append(fieldName).append(" smallint(6) comment '").append(fieldDoc).append("',");
-            } else if ("Character".equalsIgnoreCase(fieldType)) {
-                stringBuffer.append(fieldName).append(" char(1) comment '").append(fieldDoc).append("',");
-            }
-        }
-        String autoIncrementSql = "";
-        //获取携带TableId的字段，并且为他添加主键以及根据主键生成策略
-        for (Field field : fields) {
-            if (field.getAnnotation(TableId.class) != null) {
+    public Boolean createTable(Class<?> clazz, String tableName) {
+        try {
+            //获取所有字段
+            Field[] fields = clazz.getDeclaredFields();
+            //拼接sql语句
+            StringBuilder stringBuffer = new StringBuilder();
+            stringBuffer.append("create table ").append(tableName).append("(");
+            for (Field field : fields) {
+                if ("serialVersionUID".equals(field.getName())) {
+                    continue;
+                }
+                //获取字段名
                 String fieldName = entityCore.getFieldName(field);
-                String fieldType = field.getType().getSimpleName();
-                if ("String".equalsIgnoreCase(fieldType)) {
-                    stringBuffer.append("primary key (").append(fieldName).append("))");
-                } else if ("Integer".equalsIgnoreCase(fieldType)) {
-                    stringBuffer.append("primary key (").append(fieldName).append("))");
-                } else if ("Long".equalsIgnoreCase(fieldType)) {
-                    stringBuffer.append("primary key (").append(fieldName).append("))");
-                }
-                if (field.getAnnotation(TableId.class).type() == IdType.AUTO) {
-                    stringBuffer.append(" ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;");
-                    //并且为他添加自增
-                    autoIncrementSql = "ALTER TABLE " + tableName + " modify " + fieldName + " int(11) AUTO_INCREMENT;";
+                //获取字段注释
+                String fieldDoc;
+                if (field.getAnnotation(TableField.class) != null) {
+                    fieldDoc = field.getAnnotation(TableField.class).value();
                 } else {
-                    stringBuffer.append(" ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+                    //获取字段的doc注释
+                    fieldDoc = "";
+                }
+                appendSql(field, fieldName, stringBuffer, fieldDoc);
+            }
+            String autoIncrementSql = "";
+            //获取携带TableId的字段，并且为他添加主键以及根据主键生成策略
+            for (Field field : fields) {
+                if (field.getAnnotation(TableId.class) != null) {
+                    String fieldName = entityCore.getFieldName(field);
+                    String fieldType = field.getType().getSimpleName();
+                    if ("String".equalsIgnoreCase(fieldType)) {
+                        stringBuffer.append("primary key (").append(fieldName).append("))");
+                    } else if ("Integer".equalsIgnoreCase(fieldType)) {
+                        stringBuffer.append("primary key (").append(fieldName).append("))");
+                    } else if ("Long".equalsIgnoreCase(fieldType)) {
+                        stringBuffer.append("primary key (").append(fieldName).append("))");
+                    }
+                    if (field.getAnnotation(TableId.class).type() == IdType.AUTO) {
+                        stringBuffer.append(" ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;");
+                        //并且为他添加自增
+                        autoIncrementSql = "ALTER TABLE " + tableName + " modify " + fieldName + " int(11) AUTO_INCREMENT;";
+                    } else {
+                        stringBuffer.append(" ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+                    }
                 }
             }
-        }
-        log.info("TableMaintenanceService.createTable sql:{}", stringBuffer);
-        //开始执行sql语句
-        jdbcTemplate.execute(stringBuffer.toString());
-        if (StringUtils.isNotEmpty(autoIncrementSql)) {
-            jdbcTemplate.execute(autoIncrementSql);
-        }
-        //判断实体类有没有@IndexAop注解，如果有就通过注解的value值来创建索引
-        if (clazz.getAnnotation(IndexAop.class) != null) {
-            String[] indexs = clazz.getAnnotation(IndexAop.class).value();
-            for (String index : indexs) {
-                String[] indexField = index.split(",");
-                String indexName = indexField[0];
-                String indexFieldStr = indexField[1];
-                String indexType = indexField[2];
-                indexCore.createIndex(tableName, indexName, indexFieldStr, indexType);
+            log.info("TableMaintenanceService.createTable sql:{}", stringBuffer);
+            //开始执行sql语句
+            jdbcTemplate.execute(stringBuffer.toString());
+            if (StringUtils.isNotEmpty(autoIncrementSql)) {
+                jdbcTemplate.execute(autoIncrementSql);
             }
+            //判断实体类有没有@IndexAop注解，如果有就通过注解的value值来创建索引
+            if (clazz.getAnnotation(IndexAop.class) != null) {
+                String[] indexs = clazz.getAnnotation(IndexAop.class).value();
+                for (String index : indexs) {
+                    String[] indexField = index.split(",");
+                    String indexName = indexField[0];
+                    String indexFieldStr = indexField[1];
+                    String indexType = indexField[2];
+                    indexCore.createIndex(tableName, indexName, indexFieldStr, indexType);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("TableMaintenanceService.createTable error:{}", e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 根据字段类型拼接sql
+     *
+     * @param field        字段
+     * @param fieldName    字段名
+     * @param stringBuffer sql语句
+     * @param fieldDoc     字段注释
+     */
+    private void appendSql(Field field, String fieldName, StringBuilder stringBuffer, String fieldDoc) {
+        String fieldType = field.getType().getSimpleName();
+        if ("String".equalsIgnoreCase(fieldType)) {
+            stringBuffer.append(fieldName).append(" varchar(255) COMMENT '").append(fieldDoc).append("',");
+        } else if ("Integer".equalsIgnoreCase(fieldType)) {
+            stringBuffer.append(fieldName).append(" int(11) COMMENT '").append(fieldDoc).append("',");
+        } else if ("Long".equalsIgnoreCase(fieldType)) {
+            stringBuffer.append(fieldName).append(" bigint(20) COMMENT '").append(fieldDoc).append("',");
+        } else if ("Double".equalsIgnoreCase(fieldType)) {
+            stringBuffer.append(fieldName).append(" double COMMENT '").append(fieldDoc).append("',");
+        } else if ("Float".equalsIgnoreCase(fieldType)) {
+            stringBuffer.append(fieldName).append(" float COMMENT '").append(fieldDoc).append("',");
+        } else if ("Date".equalsIgnoreCase(fieldType)) {
+            stringBuffer.append(fieldName).append(" datetime COMMENT '").append(fieldDoc).append("',");
+        } else if ("Boolean".equalsIgnoreCase(fieldType)) {
+            stringBuffer.append(fieldName).append(" tinyint(1) COMMENT '").append(fieldDoc).append("',");
+        } else if ("BigDecimal".equalsIgnoreCase(fieldType)) {
+            stringBuffer.append(fieldName).append(" decimal(19,2) COMMENT '").append(fieldDoc).append("',");
+        } else if ("Byte".equalsIgnoreCase(fieldType)) {
+            stringBuffer.append(fieldName).append(" tinyint(4) COMMENT '").append(fieldDoc).append("',");
+        } else if ("Short".equalsIgnoreCase(fieldType)) {
+            stringBuffer.append(fieldName).append(" smallint(6) COMMENT '").append(fieldDoc).append("',");
+        } else if ("Character".equalsIgnoreCase(fieldType)) {
+            stringBuffer.append(fieldName).append(" char(1) COMMENT '").append(fieldDoc).append("',");
         }
     }
 
@@ -294,7 +309,7 @@ public class TableCore {
      * @return true 存在 false 不存在
      */
     public boolean isTableExist(String tableName) {
-        String sql = "select count(*) from information_schema.TABLES where table_name = '" + tableName + "'";
+        String sql = "SELECT COUNT(*) FROM information_schema.TABLES WHERE table_name = '" + tableName + "'";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class);
         return count != null && count > 0;
     }

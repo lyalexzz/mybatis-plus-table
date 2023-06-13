@@ -1,6 +1,8 @@
 package cn.zjsuki.mybatisplustable.config;
 
 import cn.zjsuki.mybatisplustable.enums.DatabaseType;
+import cn.zjsuki.mybatisplustable.enums.OperationModeType;
+import cn.zjsuki.mybatisplustable.enums.TenantFollowType;
 import cn.zjsuki.mybatisplustable.enums.TenantType;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -25,7 +27,7 @@ public class MyBatisPlusTableConfig {
     /**
      * 是否启用
      */
-    public Boolean enable;
+    public Boolean enable = false;
     /**
      * 实体类包名
      */
@@ -33,15 +35,11 @@ public class MyBatisPlusTableConfig {
     /**
      * 数据库类型
      */
-    public DatabaseType databaseType;
+    public DatabaseType databaseType = DatabaseType.MYSQL;
     /**
      * 是否开启驼峰标识
      */
-    public Boolean hump;
-    /**
-     * 请求头中租户字段
-     */
-    public String tenantId;
+    public Boolean hump = true;
     /**
      * 租户列表
      */
@@ -54,4 +52,12 @@ public class MyBatisPlusTableConfig {
      * 租户数据源列表
      */
     public Map<String, Map<String, String>> tenantDatabaseList;
+    /**
+     * 操作方式
+     */
+    public OperationModeType operationMode = OperationModeType.AT_STARTUP;
+    /**
+     * 租户跟随方式
+     */
+    public TenantFollowType tenantFollowType = TenantFollowType.SUFFIX;
 }

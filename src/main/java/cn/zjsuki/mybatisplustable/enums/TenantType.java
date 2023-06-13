@@ -17,17 +17,13 @@ public enum TenantType {
      */
     NONE(1, "不开启多租户"),
     /**
-     * 基于列的多租户
-     */
-    COLUMN(2, "基于列的多租户"),
-    /**
      * 基于表名的多租户
      */
-    TABLE(3, "基于表名的多租户"),
+    TABLE(2, "基于表名的多租户"),
     /**
      * 基于数据源的多租户
      */
-    DATASOURCE(4, "基于数据源的多租户");
+    DATASOURCE(3, "基于数据源的多租户");
 
     private final Integer value;
 
