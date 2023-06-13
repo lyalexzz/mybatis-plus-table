@@ -35,8 +35,9 @@ public class MyBatisPlusTableServiceImpl implements MyBatisPlusTableService {
     }
 
     @Override
-    public Boolean createTable(Class<?> clazz, Long tenantId) {
-        return null;
+    public Boolean createTable(Class<?> clazz, Object tenantId) {
+        String tableName = entityCore.getEntityName(clazz, tenantId.toString());
+        return tableCore.createTable(clazz,tableName);
     }
 
     @Override

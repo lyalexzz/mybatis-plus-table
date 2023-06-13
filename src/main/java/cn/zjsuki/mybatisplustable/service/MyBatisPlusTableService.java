@@ -31,7 +31,7 @@ public interface MyBatisPlusTableService {
      * @param tenantId 租户ID
      * @return 是否创建成功
      */
-    Boolean createTable(Class<?> clazz, Long tenantId);
+    Boolean createTable(Class<?> clazz, Object tenantId);
 
     /**
      * 更新表
