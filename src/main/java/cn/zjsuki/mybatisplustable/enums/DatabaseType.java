@@ -16,7 +16,47 @@ public enum DatabaseType {
     /**
      * mysql数据库
      */
-    MYSQL(1,"MySQl");
+    MYSQL(1, "MySQl"),
+
+    /**
+     * oracle数据库
+     */
+    ORACLE(2, "Oracle"),
+
+    /**
+     * sqlserver数据库
+     */
+    SQLSERVER(3, "SQLServer"),
+
+    /**
+     * postgresql数据库
+     */
+    POSTGRESQL(4, "PostgreSQL"),
+
+    /**
+     * db2数据库
+     */
+    DB2(5, "DB2"),
+
+    /**
+     * mariadb数据库
+     */
+    MARIADB(6, "MariaDB"),
+
+    /**
+     * sqlite数据库
+     */
+    SQLITE(7, "SQLite"),
+
+    /**
+     * h2数据库
+     */
+    H2(8, "H2"),
+
+    /**
+     * hsql数据库
+     */
+    HSQL(9, "HSQL");
 
     private final Integer value;
 

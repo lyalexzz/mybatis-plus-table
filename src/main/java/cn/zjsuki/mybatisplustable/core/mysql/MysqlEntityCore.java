@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 @Component
 @ComponentScan
-public class EntityCore {
+public class MysqlEntityCore {
     private final MyBatisPlusTableConfig config;
 
     /**

@@ -1,15 +1,11 @@
 package cn.zjsuki.mybatisplustable.main;
 
 import cn.zjsuki.mybatisplustable.config.MyBatisPlusTableConfig;
-import cn.zjsuki.mybatisplustable.core.mysql.EntityCore;
-import cn.zjsuki.mybatisplustable.core.mysql.TableCore;
+import cn.zjsuki.mybatisplustable.core.mysql.MysqlEntityCore;
+import cn.zjsuki.mybatisplustable.core.mysql.MysqlTableCore;
 import cn.zjsuki.mybatisplustable.enums.OperationModeType;
-import cn.zjsuki.mybatisplustable.enums.TenantFollowType;
-import cn.zjsuki.mybatisplustable.enums.TenantType;
+import cn.zjsuki.mybatisplustable.utils.MysqlStart;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.core.metadata.TableInfo;
-import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -36,9 +32,8 @@ import java.util.concurrent.*;
 @ComponentScan
 public class TableGeneral implements CommandLineRunner {
     private final MyBatisPlusTableConfig config;
-    private final TableCore tableCore;
     private static final ThreadPoolExecutor EXECUTOR;
-    private final EntityCore entityCore;
+    private final MysqlStart mysqlStart;
 
     static {
         // 核心线程数
@@ -63,65 +58,19 @@ public class TableGeneral implements CommandLineRunner {
             if (config.getOperationMode().equals(OperationModeType.AT_RUNTIME)) {
                 return;
             }
-            //开始扫描表
-            List<Class<?>> entityList = EntityCore.scanPackageForEntities(config.getEntityScan());
-            if (entityList.size() == 0) {
-                log.error("没有扫描到实体类");
-                return;
+            switch (config.getDatabaseType()) {
+                case MYSQL:
+                    mysqlStart.start();
+                    break;
+                case ORACLE:
+                    break;
+                case SQLSERVER:
+                    break;
+                case POSTGRESQL:
+                    break;
+                default:
+                    break;
             }
-            List<String> tenantIdList = config.getTenantIdList();
-            if (tenantIdList.size() == 0) {
-                tenantIdList.add("");
-            }
-            tenantIdList.forEach(tenantId -> {
-                for (Class<?> clazz : entityList) {
-                    //判断表是否存在
-                    String name = entityCore.getEntityName(clazz,tenantId);
-                    if (tableCore.isTableExist(name)) {
-                        //获取实体类的所有字段
-                        List<Field> fieldList = EntityCore.getAllFields(clazz);
-                        List<Field> fieldName = new ArrayList<>();
-                        fieldList.forEach(val -> {
-                            if ("serialVersionUID".equals(val.getName())) {
-                                return;
-                            }
-                            TableField tableField = val.getAnnotation(TableField.class);
-                            if (tableField != null && tableField.exist()) {
-                                fieldName.add(val);
-                            }
-                            if (tableField == null) {
-                                fieldName.add(val);
-                            }
-                        });
-                        //判断实体类里面的字段是否都存在
-                        List<Field> getNotExitColumn;
-                        try {
-                            getNotExitColumn = tableCore.getNotExitColumn(name, fieldName);
-                        } catch (SQLException e) {
-                            throw new RuntimeException(e);
-                        }
-                        if (getNotExitColumn.size() > 0) {
-                            //开始创建字段
-                            tableCore.createColumn(name, getNotExitColumn);
-                        }
-                        List<String> getNotExitTable = null;
-                        try {
-                            getNotExitTable = tableCore.getNotExitField(name, fieldName);
-                        } catch (SQLException e) {
-                            throw new RuntimeException(e);
-                        }
-                        if (getNotExitTable.size() > 0) {
-                            //开始删除字段
-                            tableCore.deleteColumn(name, getNotExitTable);
-                        }
-                        //创建索引
-                        tableCore.createIndex(clazz);
-                    } else {
-                        log.info("表{}不存在，开始创建表", name);
-                        tableCore.createTable(clazz,name);
-                    }
-                }
-            });
 
         };
         EXECUTOR.execute(task);

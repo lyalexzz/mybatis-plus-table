@@ -1,14 +1,16 @@
 package cn.zjsuki.mybatisplustable.service.impl;
 
-import cn.zjsuki.mybatisplustable.aop.IndexAop;
 import cn.zjsuki.mybatisplustable.config.MyBatisPlusTableConfig;
-import cn.zjsuki.mybatisplustable.core.mysql.EntityCore;
-import cn.zjsuki.mybatisplustable.core.mysql.IndexCore;
-import cn.zjsuki.mybatisplustable.core.mysql.TableCore;
+import cn.zjsuki.mybatisplustable.core.mysql.MysqlEntityCore;
+import cn.zjsuki.mybatisplustable.core.mysql.MysqlIndexCore;
+import cn.zjsuki.mybatisplustable.core.mysql.MysqlTableCore;
+import cn.zjsuki.mybatisplustable.enums.DatabaseType;
 import cn.zjsuki.mybatisplustable.service.MyBatisPlusTableService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 /**
  * @program: mybatis-plus-table
@@ -20,25 +22,34 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class MyBatisPlusTableServiceImpl implements MyBatisPlusTableService {
-    private final EntityCore entityCore;
-    private final IndexCore indexCore;
-    private final TableCore tableCore;
+    private final MysqlEntityCore mysqlEntityCore;
+    private final MysqlIndexCore mysqlIndexCore;
+    private final MysqlTableCore mysqlTableCore;
     private final MyBatisPlusTableConfig myBatisPlusTableConfig;
 
     @Override
     public Boolean createTable(Class<?> clazz) {
-        return tableCore.createTable(clazz, null);
+        if (Objects.requireNonNull(myBatisPlusTableConfig.getDatabaseType()) == DatabaseType.MYSQL) {
+            return mysqlTableCore.createTable(null,clazz, null);
+        }
+        return false;
     }
 
     @Override
     public Boolean createTable(Class<?> clazz, String tableName) {
-        return tableCore.createTable(clazz, tableName);
+        if (Objects.requireNonNull(myBatisPlusTableConfig.getDatabaseType()) == DatabaseType.MYSQL) {
+            return mysqlTableCore.createTable(null,clazz, tableName);
+        }
+        return false;
     }
 
     @Override
     public Boolean createTable(Class<?> clazz, Object tenantId) {
-        String tableName = entityCore.getEntityName(clazz, tenantId.toString());
-        return tableCore.createTable(clazz, tableName);
+        String tableName = mysqlEntityCore.getEntityName(clazz, tenantId.toString());
+        if (Objects.requireNonNull(myBatisPlusTableConfig.getDatabaseType()) == DatabaseType.MYSQL) {
+            return mysqlTableCore.createTable(tenantId.toString(),clazz, tableName);
+        }
+        return false;
     }
 
     @Override
@@ -48,12 +59,18 @@ public class MyBatisPlusTableServiceImpl implements MyBatisPlusTableService {
 
     @Override
     public Boolean createIndex(Class<?> clazz) {
-        return indexCore.createIndex(clazz, null);
+        if (Objects.requireNonNull(myBatisPlusTableConfig.getDatabaseType()) == DatabaseType.MYSQL) {
+            return mysqlIndexCore.createIndex(null,clazz, null);
+        }
+        return false;
     }
 
     @Override
     public Boolean createIndex(String tableName, String indexName, String columnName, String indexType) {
-        return indexCore.createIndex(tableName, indexName, columnName, indexType);
+        if (Objects.requireNonNull(myBatisPlusTableConfig.getDatabaseType()) == DatabaseType.MYSQL) {
+            return mysqlIndexCore.createIndex(null,tableName, indexName, columnName, indexType);
+        }
+        return false;
     }
 
     @Override
