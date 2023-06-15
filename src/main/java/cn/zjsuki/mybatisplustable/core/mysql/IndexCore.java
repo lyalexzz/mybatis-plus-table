@@ -1,5 +1,7 @@
 package cn.zjsuki.mybatisplustable.core.mysql;
 
+import cn.zjsuki.mybatisplustable.aop.IndexAop;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.ComponentScan;
@@ -21,6 +23,7 @@ import java.util.Map;
 @ComponentScan
 public class IndexCore {
     private final JdbcTemplate jdbcTemplate;
+    private final EntityCore entityCore;
 
     /**
      * 表是否存在索引
@@ -42,9 +45,34 @@ public class IndexCore {
      * @param columnName 列名
      * @paran indexType 索引类型
      */
-    public void createIndex(String tableName, String indexName, String columnName, String indexType) {
+    public Boolean createIndex(String tableName, String indexName, String columnName, String indexType) {
         String sql = "ALTER TABLE " + tableName + " ADD INDEX " + indexName + " (" + columnName + ") USING " + indexType + ";";
         jdbcTemplate.execute(sql);
+        return true;
+    }
+
+    /**
+     * 创建索引
+     *
+     * @param clazz     类
+     * @param tableName 表名
+     * @return 结果
+     */
+    public Boolean createIndex(Class<?> clazz, String tableName) {
+        if (StringUtils.isEmpty(tableName)) {
+            tableName = entityCore.getEntityName(clazz, null);
+        }
+        if (clazz.getAnnotation(IndexAop.class) != null) {
+            String[] indexs = clazz.getAnnotation(IndexAop.class).value();
+            for (String index : indexs) {
+                String[] indexField = index.split(",");
+                String indexName = indexField[0];
+                String indexFieldStr = indexField[1];
+                String indexType = indexField[2];
+                createIndex(tableName, indexName, indexFieldStr, indexType);
+            }
+        }
+        return true;
     }
 
     /**

@@ -1,5 +1,6 @@
 package cn.zjsuki.mybatisplustable.service.impl;
 
+import cn.zjsuki.mybatisplustable.aop.IndexAop;
 import cn.zjsuki.mybatisplustable.config.MyBatisPlusTableConfig;
 import cn.zjsuki.mybatisplustable.core.mysql.EntityCore;
 import cn.zjsuki.mybatisplustable.core.mysql.IndexCore;
@@ -26,18 +27,18 @@ public class MyBatisPlusTableServiceImpl implements MyBatisPlusTableService {
 
     @Override
     public Boolean createTable(Class<?> clazz) {
-        return tableCore.createTable(clazz,null);
+        return tableCore.createTable(clazz, null);
     }
 
     @Override
     public Boolean createTable(Class<?> clazz, String tableName) {
-        return tableCore.createTable(clazz,tableName);
+        return tableCore.createTable(clazz, tableName);
     }
 
     @Override
     public Boolean createTable(Class<?> clazz, Object tenantId) {
         String tableName = entityCore.getEntityName(clazz, tenantId.toString());
-        return tableCore.createTable(clazz,tableName);
+        return tableCore.createTable(clazz, tableName);
     }
 
     @Override
@@ -47,12 +48,12 @@ public class MyBatisPlusTableServiceImpl implements MyBatisPlusTableService {
 
     @Override
     public Boolean createIndex(Class<?> clazz) {
-        return null;
+        return indexCore.createIndex(clazz, null);
     }
 
     @Override
     public Boolean createIndex(String tableName, String indexName, String columnName, String indexType) {
-        return null;
+        return indexCore.createIndex(tableName, indexName, columnName, indexType);
     }
 
     @Override

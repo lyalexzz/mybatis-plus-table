@@ -34,7 +34,7 @@ public interface MyBatisPlusTableService {
     Boolean createTable(Class<?> clazz, Object tenantId);
 
     /**
-     * 更新表
+     * 更新表(未开发)
      *
      * @param clazz 类
      * @return 是否更新成功
