@@ -13,11 +13,11 @@
         enable: true #是否开启自动建表
         entityScan: com.xxx.xxx.entity #实体类扫描路径
         databaseType: mysql #数据库类型
-    	operationModeType: AT_STARTUP #操作方式 AT_STARTUP程序启动时加载表 AT_RUNTIME自行调用加载表
+        operationModeType: AT_STARTUP #操作方式 AT_STARTUP程序启动时加载表 AT_RUNTIME自行调用加载表
         hump: true #是否开启驼峰命名
         tenantType: NONE #多租户类型 NONE:不启用 TABLE:表级别，DATASOURCE:数据源级别 默认不启用
         tenantIdList: [1,2,3]    #多租户id列表
-    	TenantFollowType: SUFFIX #租户ID跟随 SUFFIX后缀 PREFIX前缀
+        tenantFollowType: SUFFIX #租户ID跟随 SUFFIX后缀 PREFIX前缀
         databaseList: #当tenantType为DATASOURCE时需要配置各个租户的数据源
             租户1:
                 url: jdbc:mysql://${MYSQL_ADDR:192.168.2.115}:${MYSQL_PORT:3306}/risk_system?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
