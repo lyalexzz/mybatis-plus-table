@@ -1,6 +1,8 @@
 package cn.zjsuki.mybatisplustable.core.mysql;
 
 import cn.zjsuki.mybatisplustable.aop.IndexAop;
+import cn.zjsuki.mybatisplustable.core.DatabaseCore;
+import cn.zjsuki.mybatisplustable.core.EntityCore;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,8 +25,8 @@ import java.util.Map;
 @ComponentScan
 public class MysqlIndexCore {
     private final JdbcTemplate jdbcTemplate;
-    private final MysqlEntityCore mysqlEntityCore;
-    private final MysqlDatabaseCore mysqlDatabaseCore;
+    private final EntityCore entityCore;
+    private final DatabaseCore databaseCore;
 
     /**
      * 创建索引
@@ -37,7 +39,7 @@ public class MysqlIndexCore {
      */
     public Boolean createIndex(String tenantId, String tableName, String indexName, String columnName, String indexType) {
         String sql = "ALTER TABLE " + tableName + " ADD INDEX " + indexName + " (" + columnName + ") USING " + indexType + ";";
-        return mysqlDatabaseCore.execute(sql, tenantId);
+        return databaseCore.execute(sql, tenantId);
     }
 
     /**
@@ -50,7 +52,7 @@ public class MysqlIndexCore {
      */
     public Boolean createIndex(String tenantId, Class<?> clazz, String tableName) {
         if (StringUtils.isEmpty(tableName)) {
-            tableName = mysqlEntityCore.getEntityName(clazz, null);
+            tableName = entityCore.getEntityName(clazz, null);
         }
         if (clazz.getAnnotation(IndexAop.class) != null) {
             String[] indexs = clazz.getAnnotation(IndexAop.class).value();

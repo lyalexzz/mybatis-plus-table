@@ -1,4 +1,4 @@
-package cn.zjsuki.mybatisplustable.core.mysql;
+package cn.zjsuki.mybatisplustable.core;
 
 import cn.zjsuki.mybatisplustable.config.MyBatisPlusTableConfig;
 import cn.zjsuki.mybatisplustable.enums.TenantFollowType;
@@ -19,14 +19,14 @@ import java.util.regex.Pattern;
 
 /**
  * @program: mybatis-plus-table
- * @description: 实体类扫描
+ * @description: 实体类方法
  * @author: LiYu
  * @create: 2023-06-01 11:46
  **/
 @RequiredArgsConstructor
 @Component
 @ComponentScan
-public class MysqlEntityCore {
+public class EntityCore {
     private final MyBatisPlusTableConfig config;
 
     /**

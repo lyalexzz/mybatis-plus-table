@@ -1,6 +1,8 @@
 package cn.zjsuki.mybatisplustable.core.mysql;
 
 import cn.zjsuki.mybatisplustable.aop.IndexAop;
+import cn.zjsuki.mybatisplustable.core.DatabaseCore;
+import cn.zjsuki.mybatisplustable.core.EntityCore;
 import cn.zjsuki.mybatisplustable.enums.DataType;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -34,8 +36,8 @@ import java.util.concurrent.atomic.AtomicReference;
 @ComponentScan
 public class MysqlTableCore {
     private final MysqlIndexCore mysqlIndexCore;
-    private final MysqlEntityCore mysqlEntityCore;
-    private final MysqlDatabaseCore databaseCore;
+    private final EntityCore entityCore;
+    private final DatabaseCore databaseCore;
 
     /**
      * 获取不存在的列
@@ -59,7 +61,7 @@ public class MysqlTableCore {
             for (Field desiredColumnName : columnNames) {
                 boolean exit = false;
                 for (String columnName : columnList) {
-                    if (mysqlEntityCore.getFieldName(desiredColumnName).equalsIgnoreCase(columnName)) {
+                    if (entityCore.getFieldName(desiredColumnName).equalsIgnoreCase(columnName)) {
                         exit = true;
                     }
                 }
@@ -87,7 +89,7 @@ public class MysqlTableCore {
                 String columnName = resultSet.getString("COLUMN_NAME");
                 boolean exit = false;
                 for (Field field : fieldList) {
-                    String fieldName = mysqlEntityCore.getFieldName(field);
+                    String fieldName = entityCore.getFieldName(field);
                     if (fieldName.equalsIgnoreCase(columnName)) {
                         exit = true;
                     }
@@ -111,7 +113,7 @@ public class MysqlTableCore {
     public void createColumn(String tenantId, String tableName, List<Field> fieldList) {
         AtomicReference<StringBuffer> stringBuffer = new AtomicReference<>(new StringBuffer());
         fieldList.forEach(val -> {
-            String fieldName = mysqlEntityCore.getFieldName(val);
+            String fieldName = entityCore.getFieldName(val);
             String fieldType = val.getType().getSimpleName();
             String fieldDoc = val.getAnnotation(TableField.class) != null ? val.getAnnotation(TableField.class).value() : "";
             if (DataType.STRING.getDesc().equalsIgnoreCase(fieldType)) {
@@ -153,7 +155,7 @@ public class MysqlTableCore {
      */
     public void deleteColumn(String tenantId, String tableName, List<String> fieldList) {
         fieldList.forEach(val -> {
-            String fieldName = mysqlEntityCore.humpToUnderline(val);
+            String fieldName = entityCore.humpToUnderline(val);
             String deleteSql = "ALTER TABLE " + tableName + " DROP COLUMN " + fieldName + ";";
             log.info("删除字段sql语句：{}", deleteSql);
             databaseCore.execute(deleteSql, tenantId);
@@ -175,7 +177,7 @@ public class MysqlTableCore {
             StringBuffer stringBuffer = new StringBuffer();
             stringBuffer.append("create table ").append(tableName).append("(");
             for (Field field : fields) {
-                String fieldName = mysqlEntityCore.getFieldName(field);
+                String fieldName = entityCore.getFieldName(field);
                 String fieldDoc;
                 if (field.getAnnotation(TableField.class) != null) {
                     TableField tableField = field.getAnnotation(TableField.class);
@@ -194,7 +196,7 @@ public class MysqlTableCore {
             //获取携带TableId的字段，并且为他添加主键以及根据主键生成策略
             for (Field field : fields) {
                 if (field.getAnnotation(TableId.class) != null) {
-                    String fieldName = mysqlEntityCore.getFieldName(field);
+                    String fieldName = entityCore.getFieldName(field);
                     String fieldType = field.getType().getSimpleName();
                     if ("String".equalsIgnoreCase(fieldType)) {
                         stringBuffer.append("primary key (").append(fieldName).append("))");

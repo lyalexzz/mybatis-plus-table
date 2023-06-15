@@ -1,7 +1,7 @@
 package cn.zjsuki.mybatisplustable.service.impl;
 
 import cn.zjsuki.mybatisplustable.config.MyBatisPlusTableConfig;
-import cn.zjsuki.mybatisplustable.core.mysql.MysqlEntityCore;
+import cn.zjsuki.mybatisplustable.core.EntityCore;
 import cn.zjsuki.mybatisplustable.core.mysql.MysqlIndexCore;
 import cn.zjsuki.mybatisplustable.core.mysql.MysqlTableCore;
 import cn.zjsuki.mybatisplustable.enums.DatabaseType;
@@ -22,7 +22,7 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class MyBatisPlusTableServiceImpl implements MyBatisPlusTableService {
-    private final MysqlEntityCore mysqlEntityCore;
+    private final EntityCore entityCore;
     private final MysqlIndexCore mysqlIndexCore;
     private final MysqlTableCore mysqlTableCore;
     private final MyBatisPlusTableConfig myBatisPlusTableConfig;
@@ -45,7 +45,7 @@ public class MyBatisPlusTableServiceImpl implements MyBatisPlusTableService {
 
     @Override
     public Boolean createTable(Class<?> clazz, Object tenantId) {
-        String tableName = mysqlEntityCore.getEntityName(clazz, tenantId.toString());
+        String tableName = entityCore.getEntityName(clazz, tenantId.toString());
         if (Objects.requireNonNull(myBatisPlusTableConfig.getDatabaseType()) == DatabaseType.MYSQL) {
             return mysqlTableCore.createTable(tenantId.toString(),clazz, tableName);
         }

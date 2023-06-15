@@ -1,4 +1,4 @@
-package cn.zjsuki.mybatisplustable.core.mysql;
+package cn.zjsuki.mybatisplustable.core;
 
 import cn.zjsuki.mybatisplustable.config.MyBatisPlusTableConfig;
 import cn.zjsuki.mybatisplustable.enums.TenantType;
@@ -12,10 +12,9 @@ import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -29,7 +28,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Component
 @ComponentScan
-public class MysqlDatabaseCore {
+public class DatabaseCore {
     private final MyBatisPlusTableConfig config;
     private final Map<String, DataSource> dataSources = new HashMap<>();
     private final JdbcTemplate jdbcTemplate;
@@ -110,6 +109,23 @@ public class MysqlDatabaseCore {
             return myJdbcTemplate.queryForObject(sql, clazz);
         } else {
             return jdbcTemplate.queryForObject(sql, clazz);
+        }
+    }
+
+    /**
+     * 执行sql 并且获取指定类型的List值
+     *
+     * @param sql      sql语句
+     * @param tenantId 租户ID
+     * @param clazz    指定类型
+     * @return List 结果
+     */
+    public List<?> executeList(String sql, String tenantId, Class<?> clazz) {
+        if (Objects.requireNonNull(config.getTenantType()) == TenantType.DATASOURCE && StringUtils.isNotBlank(tenantId)) {
+            JdbcTemplate myJdbcTemplate = new JdbcTemplate(dataSources.get(tenantId));
+            return myJdbcTemplate.queryForList(sql, clazz);
+        } else {
+            return jdbcTemplate.queryForList(sql, clazz);
         }
     }
 

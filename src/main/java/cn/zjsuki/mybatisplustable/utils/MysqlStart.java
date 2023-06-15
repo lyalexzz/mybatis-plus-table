@@ -1,17 +1,13 @@
 package cn.zjsuki.mybatisplustable.utils;
 
 import cn.zjsuki.mybatisplustable.config.MyBatisPlusTableConfig;
-import cn.zjsuki.mybatisplustable.core.mysql.MysqlDatabaseCore;
-import cn.zjsuki.mybatisplustable.core.mysql.MysqlEntityCore;
+import cn.zjsuki.mybatisplustable.core.DatabaseCore;
+import cn.zjsuki.mybatisplustable.core.EntityCore;
 import cn.zjsuki.mybatisplustable.core.mysql.MysqlTableCore;
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
@@ -30,22 +26,22 @@ import java.util.List;
 @Component
 @ComponentScan
 public class MysqlStart {
-    private final MysqlEntityCore mysqlEntityCore;
+    private final EntityCore entityCore;
     private final MyBatisPlusTableConfig myBatisPlusTableConfig;
     private final MysqlTableCore mysqlTableCore;
-    private final MysqlDatabaseCore mysqlDatabaseCore;
+    private final DatabaseCore databaseCore;
 
     /**
      * 执行
      */
     public void start() {
-        mysqlDatabaseCore.check();
+        databaseCore.check();
         List<String> tenantIdList = myBatisPlusTableConfig.getTenantIdList();
         if (tenantIdList.size() == 0) {
             tenantIdList.add("");
         }
         //开始扫描表
-        List<Class<?>> entityList = MysqlEntityCore.scanPackageForEntities(myBatisPlusTableConfig.getEntityScan());
+        List<Class<?>> entityList = EntityCore.scanPackageForEntities(myBatisPlusTableConfig.getEntityScan());
         if (entityList.size() == 0) {
             log.error("没有扫描到实体类");
             return;
@@ -53,10 +49,10 @@ public class MysqlStart {
         tenantIdList.forEach(tenantId -> {
             for (Class<?> clazz : entityList) {
                 //判断表是否存在
-                String name = mysqlEntityCore.getEntityName(clazz, tenantId);
+                String name = entityCore.getEntityName(clazz, tenantId);
                 if (mysqlTableCore.isTableExist(tenantId,name)) {
                     //获取实体类的所有字段
-                    List<Field> fieldList = MysqlEntityCore.getAllFields(clazz);
+                    List<Field> fieldList = EntityCore.getAllFields(clazz);
                     List<Field> fieldName = new ArrayList<>();
                     fieldList.forEach(val -> {
                         if ("serialVersionUID".equals(val.getName())) {
