@@ -181,7 +181,11 @@ public class TableCore {
                 //获取字段注释
                 String fieldDoc;
                 if (field.getAnnotation(TableField.class) != null) {
-                    fieldDoc = field.getAnnotation(TableField.class).value();
+                    TableField tableField = field.getAnnotation(TableField.class);
+                    if (!tableField.exist()) {
+                        continue;
+                    }
+                    fieldDoc = tableField.value();
                 } else {
                     //获取字段的doc注释
                     fieldDoc = "";
