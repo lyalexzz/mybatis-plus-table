@@ -281,7 +281,7 @@ public class MysqlTableCore {
      */
     public void createIndex(String tenantId, Class<?> clazz) {
         //获取表名
-        String tableName = clazz.getAnnotation(TableName.class).value();
+        String tableName = entityCore.getEntityName(clazz,tenantId);
         //判断实体类有没有@IndexAop注解，如果有就通过注解的value值来创建索引
         if (clazz.getAnnotation(IndexAop.class) != null) {
             //表中的索引如果在注解中不存在就删除索引，如果存在就不做任何操作

@@ -2,7 +2,6 @@ package cn.zjsuki.mybatisplustable.main;
 
 import cn.zjsuki.mybatisplustable.config.MyBatisPlusTableConfig;
 import cn.zjsuki.mybatisplustable.enums.OperationModeType;
-import cn.zjsuki.mybatisplustable.utils.MysqlStart;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -27,6 +26,7 @@ public class TableGeneral implements CommandLineRunner {
     private final MyBatisPlusTableConfig config;
     private static final ThreadPoolExecutor EXECUTOR;
     private final MysqlStart mysqlStart;
+    private final OracleStart oracleStart;
 
     static {
         // 核心线程数
@@ -56,6 +56,7 @@ public class TableGeneral implements CommandLineRunner {
                     mysqlStart.start();
                     break;
                 case ORACLE:
+                    oracleStart.start();
                     break;
                 case SQLSERVER:
                     break;

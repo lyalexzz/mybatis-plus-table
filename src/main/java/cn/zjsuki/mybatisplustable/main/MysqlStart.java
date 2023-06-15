@@ -1,4 +1,4 @@
-package cn.zjsuki.mybatisplustable.utils;
+package cn.zjsuki.mybatisplustable.main;
 
 import cn.zjsuki.mybatisplustable.config.MyBatisPlusTableConfig;
 import cn.zjsuki.mybatisplustable.core.DatabaseCore;
