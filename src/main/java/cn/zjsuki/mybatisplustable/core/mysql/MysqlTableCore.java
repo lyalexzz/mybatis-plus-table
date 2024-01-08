@@ -281,7 +281,7 @@ public class MysqlTableCore {
      */
     public void createIndex(String tenantId, Class<?> clazz) {
         //获取表名
-        String tableName = entityCore.getEntityName(clazz,tenantId);
+        String tableName = entityCore.getEntityName(clazz, tenantId);
         //判断实体类有没有@IndexAop注解，如果有就通过注解的value值来创建索引
         if (clazz.getAnnotation(IndexAop.class) != null) {
             //表中的索引如果在注解中不存在就删除索引，如果存在就不做任何操作
@@ -319,5 +319,49 @@ public class MysqlTableCore {
         return count != null && count > 0;
     }
 
+    /**
+     * 通过Class以及他的mybatis-plus注解更新表
+     *
+     * @param tenantId  租户id
+     * @param clazz     类
+     * @param tableName 表名
+     * @return 是否更新成功
+     */
+    public Boolean updateTable(String tenantId, Class<?> clazz, String tableName) {
+        try {
+            //获取表结构存在的字段但是实体类中不存在的字段
+            List<String> notExitField = getNotExitField(tenantId, tableName, entityCore.getFieldList(clazz));
+            //获取不存在的列
+            List<Field> notExitColumn = getNotExitColumn(tenantId, tableName, entityCore.getFieldList(clazz));
+            //获取表中存在的字段
+            List<Field> columnNames = entityCore.getFieldList(clazz);
+            //获取表中存在的字段但是实体类中不存在的字段
+            List<String> notExitColumnField = getNotExitField(tenantId, tableName, columnNames);
+            //获取表中不存在的字段
+            List<String> notExitFieldList = getNotExitField(tenantId, tableName, columnNames);
+            //如果表中存在的字段但是实体类中不存在的字段不为空，就删除这些字段
+            if (!notExitColumnField.isEmpty()) {
+                deleteColumn(tenantId, tableName, notExitColumnField);
+            }
+            //如果表中不存在的字段不为空，就创建这些字段
+            if (!notExitFieldList.isEmpty()) {
+                createColumn(tenantId, tableName, notExitColumn);
+            }
+            //如果表结构存在的字段但是实体类中不存在的字段不为空，就删除这些字段
+            if (!notExitField.isEmpty()) {
+                deleteColumn(tenantId, tableName, notExitField);
+            }
+            //如果表中存在的字段但是实体类中不存在的字段不为空，就创建这些字段
+            if (!notExitColumn.isEmpty()) {
+                createColumn(tenantId, tableName, notExitColumn);
+            }
+            //判断实体类有没有@IndexAop注解，如果有就通过注解的value值来创建索引
+            createIndex(tenantId, clazz);
+        } catch (Exception e) {
+            log.error("TableMaintenanceService.updateTable error:{}", e.getMessage());
+            return false;
+        }
+        return true;
+    }
 
 }

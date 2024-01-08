@@ -155,5 +155,21 @@ public class EntityCore {
         return builder.toString();
     }
 
-
+    public List<Field> getFieldList(Class<?> clazz) {
+        List<Field> fieldList = EntityCore.getAllFields(clazz);
+        List<Field> fieldName = new ArrayList<>();
+        fieldList.forEach(val -> {
+            if ("serialVersionUID".equals(val.getName())) {
+                return;
+            }
+            TableField tableField = val.getAnnotation(TableField.class);
+            if (tableField != null && tableField.exist()) {
+                fieldName.add(val);
+            }
+            if (tableField == null) {
+                fieldName.add(val);
+            }
+        });
+        return fieldName;
+    }
 }

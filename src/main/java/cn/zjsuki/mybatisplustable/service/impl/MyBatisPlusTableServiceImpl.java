@@ -54,6 +54,9 @@ public class MyBatisPlusTableServiceImpl implements MyBatisPlusTableService {
 
     @Override
     public Boolean updateTable(Class<?> clazz) {
+        if (Objects.requireNonNull(myBatisPlusTableConfig.getDatabaseType()) == DatabaseType.MYSQL) {
+            return mysqlTableCore.updateTable(null,clazz, null);
+        }
         return null;
     }
 
